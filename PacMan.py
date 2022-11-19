@@ -1,7 +1,6 @@
 import pygame
 import random
 
-
 state = False
 nome = input('Nome: ')
 email = input('Email: ')
@@ -17,7 +16,7 @@ tamanho = (largura, altura)
 pygameDisplay = pygame.display
 pygameDisplay.set_caption("PacMan")
 bg = pygame.image.load("assets/background.png")
-
+bg_perdeu = pygame.image.load("assets/over.png")
 
 gameDisplay = pygame.display.set_mode(tamanho)
 gameEvents = pygame.event
@@ -26,6 +25,21 @@ clock = pygame.time.Clock()
 icone = pygame.image.load("assets/pacman2.ico")
 pygameDisplay.set_icon(icone)
 
+white = (255, 255, 255)
+green = (34,139,34)
+red = (255,0,0)
+
+def perdeu(pontos):
+    gameDisplay.blit(bg_perdeu, (0,0))
+    pygame.mixer.music.stop()
+    fonte = pygame.font.Font("freesansbold.ttf", 25)
+    texto = fonte.render("Você obteve "+str(pontos) +" pontos!", True, green)
+    gameDisplay.blit(texto, (520, 90))
+    fonteContinue = pygame.font.Font("freesansbold.ttf", 20)
+    textoContinue = fonteContinue.render("press enter to restart", True, green)
+    gameDisplay.blit(textoContinue, (560,115))
+
+    pygameDisplay.update()
 
 def main():
     jogando = True
@@ -76,6 +90,7 @@ def main():
             if leftPress:
                 movimentoXPlayer = -velocidadePlayer
 
+            #controlar limites do boneco
             posicaoXPlayer = posicaoXPlayer + movimentoXPlayer
             if posicaoXPlayer < 0:
                 posicaoXPlayer = 0
@@ -86,6 +101,15 @@ def main():
             gameDisplay.blit(boneco, (posicaoXPlayer, posicaoYPlayer))
             gameDisplay.blit(fantasma, (movimentoX, movimentoY))
 
+            fonte = pygame.font.Font('freesansbold.ttf', 20)
+            texto = fonte.render("Pontos: "+str(pontos), True, white)
+            gameDisplay.blit(texto, (20, 25))
+
+            fonteMorte = pygame.font.Font('freesansbold.ttf', 20)
+            pontosMortetxt = fonteMorte.render("Erros: "+str(pontosMorte), True, red)
+            gameDisplay.blit(pontosMortetxt, (130, 25))
+
+            # movimento do fantasma
             if direcao == True:
                 if movimentoY <= 480 - 68:
                     movimentoY = movimentoY + velocidade
@@ -95,10 +119,12 @@ def main():
                     velocidade = velocidade + 0.4
                     pontosMorte += 1
                     if pontosMorte == 3:
+                        perdeu(pontos)
                         jogando = False
                     else:    
                         direcao = True
         
+        #colisão do fantasma com o personagem    
         bonecoRect = boneco.get_rect()
         bonecoRect.x = posicaoXPlayer
         bonecoRect.y = posicaoYPlayer   
